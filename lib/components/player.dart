@@ -17,10 +17,16 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation runningAnimation;
   final double stepTime = 0.05;
 
+  final double _gravity = 9.8;
+  final double _jumpForce = 460;
+  final double _terminalVelocity = 300;
+
   double horizontalMovement = 0;
   double moveSpeed = 100;
   Vector2 velocity = Vector2.zero();
   List<CollisionBlock> collisionBlocks = [];
+  bool _isOnGround = false;
+  bool hasJumped = false;
 
   @override
   FutureOr<void> onLoad() {
@@ -34,6 +40,8 @@ class Player extends SpriteAnimationGroupComponent
     _updatePlayerState();
     _updatePlayerMovement(dt);
     _checkHorizontalCollisons();
+    _applyGravity(dt);
+    _checkVerticalCollisions();
     super.update(dt);
   }
 
@@ -48,6 +56,8 @@ class Player extends SpriteAnimationGroupComponent
         keysPressed.contains(LogicalKeyboardKey.arrowRight);
     horizontalMovement += isLeftKeyPressed ? -1 : 0;
     horizontalMovement += isRightKeyPressed ? 1 : 0;
+
+    hasJumped = keysPressed.contains(LogicalKeyboardKey.space);
 
     return super.onKeyEvent(event, keysPressed);
   }
@@ -91,8 +101,19 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   void _updatePlayerMovement(double dt) {
+    if (hasJumped && _isOnGround) {
+      _playerJump(dt);
+    }
+
     velocity.x = horizontalMovement * moveSpeed;
     position.x += velocity.x * dt;
+  }
+
+  void _playerJump(double dt) {
+    velocity.y = -_jumpForce;
+    position.y += velocity.y * dt;
+    hasJumped = false;
+    _isOnGround = false;
   }
 
   void _checkHorizontalCollisons() {
@@ -103,10 +124,48 @@ class Player extends SpriteAnimationGroupComponent
           if (velocity.x > 0) {
             velocity.x = 0;
             position.x = block.x - width;
+            break;
           }
           if (velocity.x < 0) {
             velocity.x = 0;
             position.x = block.x + block.width + width;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  void _applyGravity(double dt) {
+    velocity.y += _gravity;
+    velocity.y = velocity.y.clamp(-_jumpForce, _terminalVelocity);
+    position.y += velocity.y * dt;
+  }
+
+  void _checkVerticalCollisions() {
+    for (final block in collisionBlocks) {
+      //Handle Collision
+      if (block.isPlatform) {
+        if (checkCollision(this, block)) {
+          if (velocity.y > 0) {
+            velocity.y = 0;
+            position.y = block.y - height;
+            _isOnGround = true;
+            break;
+          }
+        }
+      } else {
+        if (checkCollision(this, block)) {
+          if (velocity.y > 0) {
+            velocity.y = 0;
+            position.y = block.y - height;
+            _isOnGround = true;
+            break;
+          }
+          if (velocity.y < 0) {
+            velocity.y = 0;
+            position.y = block.y + block.height;
+            break;
           }
         }
       }
