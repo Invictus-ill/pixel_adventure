@@ -1,5 +1,5 @@
 {
-    "activeFile": "",
+    "activeFile": "Level - 01.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -9,11 +9,11 @@
             "expandedObjectLayers": [
                 3
             ],
-            "scale": 1.7,
+            "scale": 3.2385,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 252.05882352941177,
-                "y": 208.5294117647059
+                "x": 497.91570171375633,
+                "y": 33.50316504554577
             }
         },
         "Level - 02.tmx": {
@@ -39,6 +39,7 @@
     "map.tileWidth": 16,
     "map.width": 40,
     "openFiles": [
+        "Level - 01.tmx"
     ],
     "project": "Pixel Adventure.tiled-project",
     "recentFiles": [
